@@ -36,4 +36,18 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             String keyword,
             Pageable pageable
     );
+
+    // NEW: category + keyword
+    Page<Product> findByActiveTrueAndCategory_SlugAndNameContainingIgnoreCase(
+            String categorySlug,
+            String keyword,
+            Pageable pageable
+    );
+
+    // NEW: brand + keyword
+    Page<Product> findByActiveTrueAndBrand_SlugAndNameContainingIgnoreCase(
+            String brandSlug,
+            String keyword,
+            Pageable pageable
+    );
 }

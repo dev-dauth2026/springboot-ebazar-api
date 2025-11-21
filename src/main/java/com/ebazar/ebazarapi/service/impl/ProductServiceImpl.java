@@ -26,20 +26,78 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
 
+    // =========================
+    // Catalogue / listing
+    // =========================
     @Override
-    public Page<ProductDto> listProducts(String q, Pageable pageable) {
+    public Page<ProductDto> listProducts(
+            String categorySlug,
+            String brandSlug,
+            String keyword,
+            Pageable pageable
+    ) {
+        boolean hasCategory = StringUtils.hasText(categorySlug);
+        boolean hasBrand = StringUtils.hasText(brandSlug);
+        boolean hasKeyword = StringUtils.hasText(keyword);
+
         Page<Product> page;
 
-        if (StringUtils.hasText(q)) {
+        if (!hasCategory && !hasBrand && !hasKeyword) {
+            // No filters: just list all active products
+            page = productRepository.findByActiveTrue(pageable);
+
+        } else if (hasCategory && !hasBrand && !hasKeyword) {
+            // Only category filter
+            page = productRepository.findByActiveTrueAndCategory_Slug(categorySlug, pageable);
+
+        } else if (!hasCategory && hasBrand && !hasKeyword) {
+            // Only brand filter
+            page = productRepository.findByActiveTrueAndBrand_Slug(brandSlug, pageable);
+
+        } else if (!hasCategory && !hasBrand && hasKeyword) {
+            // Only keyword search
+            page = productRepository.findByActiveTrueAndNameContainingIgnoreCase(
+                    keyword.trim(), pageable);
+
+        } else if (hasCategory && hasBrand && hasKeyword) {
+            // Category + brand + keyword
             page = productRepository
-                    .findByActiveTrueAndNameContainingIgnoreCase(q.trim(), pageable);
+                    .findByActiveTrueAndCategory_SlugAndBrand_SlugAndNameContainingIgnoreCase(
+                            categorySlug,
+                            brandSlug,
+                            keyword.trim(),
+                            pageable
+                    );
+
+        } else if (hasCategory && hasKeyword && !hasBrand) {
+            // Category + keyword
+            page = productRepository
+                    .findByActiveTrueAndCategory_SlugAndNameContainingIgnoreCase(
+                            categorySlug,
+                            keyword.trim(),
+                            pageable
+                    );
+
+        } else if (hasBrand && hasKeyword && !hasCategory) {
+            // Brand + keyword
+            page = productRepository
+                    .findByActiveTrueAndBrand_SlugAndNameContainingIgnoreCase(
+                            brandSlug,
+                            keyword.trim(),
+                            pageable
+                    );
+
         } else {
+            // Fallback: no sensible combination, just return all active
             page = productRepository.findByActiveTrue(pageable);
         }
 
         return page.map(this::toDto);
     }
 
+    // =========================
+    // Detail / lookups
+    // =========================
     @Override
     public ProductDto getProductById(Long id) {
         Product product = productRepository.findById(id)
@@ -60,6 +118,9 @@ public class ProductServiceImpl implements ProductService {
         return toDto(product);
     }
 
+    // =========================
+    // Create / update / delete
+    // =========================
     @Override
     public ProductDto createProduct(ProductDto dto) {
 

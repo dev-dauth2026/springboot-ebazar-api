@@ -7,17 +7,29 @@ import com.ebazar.ebazarapi.dto.ProductDto;
 
 public interface ProductService {
 
-    Page<ProductDto> listProducts(String q, Pageable pageable);
+    // Public catalogue (with filters)
+    Page<ProductDto> listProducts(
+            String categorySlug,
+            String brandSlug,
+            String keyword,
+            Pageable pageable
+    );
 
-    ProductDto getProductById(Long id);
-
+    // Public detail pages
     ProductDto getProductBySlug(String slug);
 
+    // Admin detail by ID
+    ProductDto getProductById(Long id);
+
+    // Admin create
     ProductDto createProduct(ProductDto dto);
 
+    // Admin update
     ProductDto updateProduct(Long id, ProductDto dto);
 
-    void deleteProduct(Long id);
-
+    // Admin change active status
     ProductDto changeActiveStatus(Long id, boolean active);
+
+    // Admin delete
+    void deleteProduct(Long id);
 }
