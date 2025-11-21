@@ -31,6 +31,9 @@ public class SecurityConfig {
                         "/swagger-ui/**",
                         "/swagger-ui.html"
                 ).permitAll()
+                
+                // 🔓 Public auth endpoint (sign up)
+                .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
 
                 // 🔓 Public catalogue endpoints (anyone can see products)
                 .requestMatchers(HttpMethod.GET,
