@@ -33,11 +33,21 @@ public class SecurityConfig {
                 ).permitAll()
 
                 // 🔓 Public catalogue endpoints (anyone can see products)
-                .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/slug/**")
-                    .permitAll()
+                .requestMatchers(HttpMethod.GET,
+                        "/api/products",
+                        "/api/products/slug/**",
+                        "/api/brands",
+                        "/api/categories"
+                ).permitAll()
 
                 // 🔒 Admin-only product management endpoints
                 .requestMatchers("/api/products/**").hasRole("ADMIN")
+                
+                // 🔒 Admin-only brand management
+                .requestMatchers("/api/brands/**").hasRole("ADMIN")
+
+                // 🔒 Admin-only category management
+                .requestMatchers("/api/categories/**").hasRole("ADMIN")
 
                 // Everything else must be authenticated
                 .anyRequest().authenticated()
