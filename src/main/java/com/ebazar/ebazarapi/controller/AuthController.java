@@ -3,11 +3,7 @@ package com.ebazar.ebazarapi.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.ebazar.ebazarapi.dto.UserRegistrationDto;
 import com.ebazar.ebazarapi.dto.UserResponseDto;
@@ -35,19 +31,21 @@ public class AuthController {
             @Validated @RequestBody UserRegistrationDto dto
     ) {
         UserResponseDto created = authService.register(dto);
-        var location = java.net.URI.create("/api/users/" + created.getId()); // future user detail URL
+        var location = java.net.URI.create("/api/users/" + created.getId());
         return ResponseEntity.created(location).body(created);
     }
-    
+
     @Operation(summary = "Get currently authenticated user")
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> me(Authentication authentication) {
-        Object principal = authentication.getPrincipal();
 
+        // Determine the username (email)
         String email;
-        if (principal instanceof CustomUserDetails cud) {
+
+        if (authentication.getPrincipal() instanceof CustomUserDetails cud) {
             email = cud.getUsername();
-        } else if (principal instanceof org.springframework.security.core.userdetails.UserDetails ud) {
+        } else if (authentication.getPrincipal() 
+                instanceof org.springframework.security.core.userdetails.UserDetails ud) {
             email = ud.getUsername();
         } else {
             email = authentication.getName();
