@@ -7,6 +7,7 @@ import com.ebazar.ebazarapi.dto.UserRegistrationDto;
 import com.ebazar.ebazarapi.dto.UserResponseDto;
 import com.ebazar.ebazarapi.entity.User;
 import com.ebazar.ebazarapi.exception.DuplicateResourceException;
+import com.ebazar.ebazarapi.exception.ResourceNotFoundException;
 import com.ebazar.ebazarapi.repository.UserRepository;
 import com.ebazar.ebazarapi.service.AuthService;
 
@@ -43,6 +44,15 @@ public class AuthServiceImpl implements AuthService {
 
         // 3) map to response dto (no password)
         return toResponseDto(saved);
+    }
+    
+    @Override
+    public UserResponseDto getCurrentUser(String email) {
+        return userRepository.findByEmailIgnoreCase(email.trim())
+                .map(this::toResponseDto)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User with email '%s' not found".formatted(email)
+                ));
     }
 
     private UserResponseDto toResponseDto(User user) {

@@ -6,4 +6,6 @@ import com.ebazar.ebazarapi.dto.UserResponseDto;
 public interface AuthService {
 
     UserResponseDto register(UserRegistrationDto dto);
+    
+    UserResponseDto getCurrentUser(String email);
 }
